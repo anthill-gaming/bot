@@ -4,8 +4,9 @@ from anthill.framework.db import db
 from anthill.framework.utils import timezone
 from anthill.framework.utils.module_loading import import_string
 from anthill.framework.utils.functional import cached_property
+from anthill.framework.utils.translation import translate_lazy as _
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy_utils.types import JSONType
+from sqlalchemy_utils.types import JSONType, ChoiceType
 from bot.actions.base import BaseAction
 from typing import List
 
@@ -74,22 +75,28 @@ class Bot(db.Model):
 class Action(db.Model):
     __tablename__ = 'actions'
 
+    TYPES = (
+        ('path', _('Path')),
+        ('code', _('Code')),
+    )
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(128), nullable=False)
     description = db.Column(db.String(512), nullable=False)
-    value = db.Column(db.String(512), nullable=False)
+    value = db.Column(db.Text, nullable=False)
+    type = db.Column(ChoiceType(TYPES))
     enabled = db.Column(db.Boolean, nullable=False, default=True)
-    formatters = db.relationship('ResultFormatter', backref='action', lazy='dynamic')
+    formatter_id = db.Column(db.Integer, db.ForeignKey('formatters.id'))
 
     def __repr__(self):
-        return "<Action(name=%s, description=%s, value=%s)>" % (self.name, self.description, self.value)
+        return "<Action(name=%s, description=%s)>" % (self.name, self.description)
+
+    def __getattr__(self, item):
+        return getattr(self.value_object, item)
 
     @cached_property
     def value_object(self) -> BaseAction:
         return import_string(self.value)()
-
-    def active_formatter(self):
-        return self.formatters.filter_by(enabled=True).first()
 
 
 class ResultFormatter(db.Model):
@@ -97,5 +104,5 @@ class ResultFormatter(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     template = db.Column(db.Text, nullable=False)
-    action_id = db.Column(db.Integer, db.ForeignKey('actions.id'))
+    action = db.relationship('Action', backref='formatter', lazy='dynamic')
     enabled = db.Column(db.Boolean, nullable=False, default=True)

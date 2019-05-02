@@ -23,7 +23,7 @@ class _SocketIOClientNamespace(socketio.AsyncClientNamespace):
         for action in self.bot.actions:
             try:
                 emit = functools.partial(self.emit, event='message')
-                await action.value_object.on_message(data, emit=emit)
+                await action.on_message(data, emit=emit)
                 # TODO: reply?
             except ActionError:
                 logger.error('Action `%s` cannot process message %s.' % (action, data))
