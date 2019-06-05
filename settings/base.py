@@ -28,7 +28,7 @@ LOCALE_PATH = os.path.join(BASE_DIR, 'locale')
 # APPLICATION_CLASS = 'bot.apps.AnthillApplication'
 APPLICATION_NAME = 'bot'
 APPLICATION_VERBOSE_NAME = _('Bot')
-APPLICATION_DESCRIPTION = _('Service description')
+APPLICATION_DESCRIPTION = _('Provide bot service')
 APPLICATION_ICON_CLASS = 'icon-android'
 APPLICATION_COLOR = 'slate'
 
