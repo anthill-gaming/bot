@@ -1,3 +1,4 @@
 Bot
 =============================================
-Provide bot service
+Provide bot service.
+Currently under heavy development.
